@@ -1,4 +1,4 @@
-module sweet
+module github.com/linjunhao1997/sweet
 
 go 1.21.5
 
