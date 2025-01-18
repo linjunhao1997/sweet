@@ -28,29 +28,26 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
-		s.Start()
-		defer func() {
-			s.Stop()
-			fmt.Println("generate gorm column file successful.")
-		}()
-		pathsVal, _ := cmd.Flags().GetString(gormColumn)
+		pathsVal, _ := cmd.Flags().GetStringSlice(gormColumn)
 		if len(pathsVal) > 0 {
-			paths := strings.Split(pathsVal, " ")
-			for _, path := range paths {
+			for _, path := range pathsVal {
 				split := strings.Split(path, "/")
 				path = split[len(split)-1]
+				s := spinner.New(spinner.CharSets[9], 100*time.Millisecond)
+				s.Start()
 				err := codegen.GenerateGormColumn(strings.TrimSpace(path))
 				if err != nil {
 					log.Fatal(err)
 				}
+				s.Stop()
+				fmt.Println(fmt.Sprintf("path: %s, generate gorm column file successful", path))
 			}
 		}
 	},
 }
 
 func init() {
-	codegenCmd.Flags().StringP(gormColumn, "", "", "go文件路径,多个文件使用空格")
+	codegenCmd.Flags().StringSliceP(gormColumn, "", []string{}, "go文件路径,多个文件使用空格")
 	rootCmd.AddCommand(codegenCmd)
 
 	// Here you will define your flags and configuration settings.
