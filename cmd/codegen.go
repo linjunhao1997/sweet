@@ -5,8 +5,9 @@ package cmd
 
 import (
 	"fmt"
-
+	"github.com/linjunhao1997/sweet/codegen"
 	"github.com/spf13/cobra"
+	"log"
 )
 
 const (
@@ -26,7 +27,11 @@ to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
 		path, _ := cmd.Flags().GetString(gormColumn)
 		if len(path) > 0 {
-			fmt.Println(path)
+			err := codegen.GenerateGormColumn(path)
+			if err != nil {
+				log.Fatal(err)
+			}
+			fmt.Println("generate gorm column file successful.")
 		}
 	},
 }

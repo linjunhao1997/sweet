@@ -8,6 +8,11 @@ import (
 	"strings"
 )
 
+type GoFile struct {
+	PackageName string
+	StructNodes []StructNode
+}
+
 type StructNode struct {
 	StructName string
 	Fields     []FieldNode
@@ -24,13 +29,17 @@ type TagNode struct {
 	Value string
 }
 
-func ParseStructNode(filename string) (res []StructNode, err error) {
+func Parse(filename string) (res *GoFile, err error) {
+
 	fileSet := token.NewFileSet()
 	f, err := parser.ParseFile(fileSet, filename, nil, parser.ParseComments)
 	if err != nil {
 		return nil, err
 	}
-
+	res = &GoFile{
+		PackageName: f.Name.Name,
+		StructNodes: make([]StructNode, 0),
+	}
 	for _, decl := range f.Decls {
 		switch d := decl.(type) {
 		case *ast.GenDecl:
@@ -40,10 +49,7 @@ func ParseStructNode(filename string) (res []StructNode, err error) {
 			if d.Doc == nil {
 				continue
 			}
-			docText := strings.ToLower(d.Doc.Text())
-			if !strings.HasPrefix(docText, "gen") {
-				continue
-			}
+			// docText := strings.ToLower(d.Doc.Text())
 
 			for _, spec := range d.Specs {
 				switch sp := spec.(type) {
@@ -70,15 +76,13 @@ func ParseStructNode(filename string) (res []StructNode, err error) {
 									FieldName: name.String(),
 									Tag:       reflect.StructTag(strings.Trim(field.Tag.Value, "`")),
 								})
-								res = append(res, structNode)
 							}
-
 						}
+						res.StructNodes = append(res.StructNodes, structNode)
 					}
-
 				}
 			}
 		}
 	}
-	return
+	return res, nil
 }
