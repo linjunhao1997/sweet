@@ -58,7 +58,7 @@ func GenerateGormColumn(filename string) error {
 	}
 	f.Const().Defs(list...)
 
-	if err = f.Save(fmt.Sprintf("gorm_column_generated.go")); err != nil {
+	if err = f.Save(fmt.Sprintf("%s_generated.go", strings.TrimRight(filename, ".go"))); err != nil {
 		return err
 	}
 	return nil
